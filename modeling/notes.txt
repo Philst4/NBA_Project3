@@ -1,0 +1,12 @@
+MODEL TESTS:
+* Got to 64% accuracy using PLUS_MINUS alone ...
+* * only need 'for', 'ag' is inverse of 'for' by definition
+* LOGISTIC REGRESSION (sklearn)
+* * Reached 67% using PLUS_MINUS and IS_HOME (with scaled data)
+* * * Marginally better results using all other stats
+* * * Reached roughly same marks with unscaled data
+* * * takes way longer to train with unscaled, so worth using scaled
+* RANDOM FOREST
+* * Also reached 66-67%
+* GBM
+* * 67+%

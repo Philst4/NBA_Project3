@@ -1,0 +1,54 @@
+WHEN TO TAKE A BET:
+* Risk tolerance (false positives vs false negatives)
+* Utility function
+* Use ML to learn decision thresholds?
+* Do a sensitivity analysis?
+
+
+
+
+FILE STRUCTURE 
+
+* /data
+* * read.py (read in data from NBA_API)
+* * clean.py (put in NaN values, add 'IS_HOME' feature)
+* * mirror.py (turn into 'for', 'against') => eventually used as targets
+* * streak.py (turn into:
+             'for_prev_k_A', 'against_prev_k_A',
+             'for_prev_k_B', 'against_prev_k_B' ) => eventually used as inputs
+            * make a dset for each k-value, ideally. Worry about merging later.
+            * don't duplicate mirror.csv data. 
+* * /raw
+* * * raw.csv
+* * /unscaled
+* * * clean.csv
+* * * mirror.csv (aka targets.csv)
+* * * streak_k.csv (for all k's)
+* * /scaled
+* * * clean.csv
+* * * mirror.csv (aka targets.csv)
+* * * streak_k.csv (for all k's)
+
+... more feature selection, feature engineering ... 
+
+* /modeling (stuff for building models)
+* * /models (contains the model types)
+* * train
+* * test
+* main.py (for running everything)
+
+
+
+
+---- RESEARCH ---- 
+* https://medium.com/@jriordan1/predicting-2023-24-nba-win-totals-a515b6f845cc
+* https://towardsdatascience.com/predicting-the-outcome-of-nba-games-with-machine-learning-a810bb768f20
+* https://fivethirtyeight.com/methodology/how-our-nba-predictions-work/
+* https://digitalcommons.bryant.edu/cgi/viewcontent.cgi?article=1000&context=honors_data_science#:~:text=Common%20models%20used%20to%20predict,quantify%20the%20wins%20and%20losses.
+* https://cs229.stanford.edu/proj2019aut/data/assignment_308832_raw/26645648.pdf
+* https://www.nba.com/stats/help/faq
+* https://www.sportsgamblingpodcast.com/2020/04/20/nba-most-valuable-statistic/
+* https://github.com/swar/nba_api/blob/master/docs/examples/Home%20Team%20Win-Loss%20Modeling/Home%20Team%20Win-Loss%20Modeling.ipynb
+
+* https://www.investopedia.com/sportsbook-5217715
+* https://www.techopedia.com/gambling-guides/how-to-bet-on-nba-games#:~:text=Sportsbooks%20set%20the%20total%20for,Over%20or%20Under%20that%20total.

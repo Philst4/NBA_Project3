@@ -1,0 +1,44 @@
+MODEL TESTS (using only team data):
+* Got to 64% accuracy using PLUS_MINUS alone ...
+* * only need 'for', 'ag' is inverse of 'for' by definition
+* LOGISTIC REGRESSION (sklearn)
+* * Reached 67% using PLUS_MINUS and IS_HOME (with scaled data)
+* * * Marginally better results using all other stats
+* * * Reached roughly same marks with unscaled data
+* * * takes way longer to train with unscaled, so worth using scaled
+* RANDOM FOREST
+* * Also reached 66-67%
+* GBM
+* * 67+%
+
+
+
+#####
+# Notes from NBA Project 2
+* Didn't properly implement a neural network (yet)
+* Don't need to use ALL streak data (0 should suffice)
+
+* FG3_PCT on its own may be bad, want 3PA as well (data skewed by season)
+* Same with FG2_PCT, want 2PA
+
+
+
+#####
+Notes from NBA API:
+* First season with data is '1983-84', up to current data
+* Features are:
+
+'SEASON_ID', 'TEAM_ID', 'TEAM_ABBREVIATION', 'TEAM_NAME', 'GAME_ID',
+       'GAME_DATE', 'MATCHUP', 'WL', 'MIN', 'PTS', 'FGM', 'FGA', 'FG_PCT',
+       'FG3M', 'FG3A', 'FG3_PCT', 'FTM', 'FTA', 'FT_PCT', 'OREB', 'DREB',
+       'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF', 'PLUS_MINUS'
+
+* Seem to be certain games where 3pt percentage isn't tracked; PLUS_MINUS isn't tracked at all early on
+
+
+* Season id's are 5 digits, preceded by a digit that indicates what type of games 
+* Season id's first digit being '2' indicates regular season
+* Some seasons have more games than 82 under the regular season index than possible
+* * Solution: take 82-game head
+
+* leaguegamefinder returns a dataframe list of length 1

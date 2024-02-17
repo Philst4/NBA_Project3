@@ -1,0 +1,8 @@
+Basically, what it seems we want to do is:
+* create a player matrix for each team's perspective of a game
+* use the player matrix via a CNN (along with team data)
+
+NOTE:
+* Players have synergistic and antagonistic relationships with one another
+* * both together and against
+
