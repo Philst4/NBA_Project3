@@ -1,0 +1,8 @@
+This branch is to be used for implementing a data standardization
+process (after cleaning, before mirroring + streaking) and 
+experimenting with the standardized data to build models.
+
+NOTES:
+
+The data needs to be scaled + normalized before taking streak data.
+This is why it is important to incorporate this into the process. 

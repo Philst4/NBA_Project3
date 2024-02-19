@@ -77,78 +77,61 @@ def clean_plus_minus(df_clean : pd.DataFrame) -> pd.DataFrame:
 def clean_other_numeric(df_clean : pd.DataFrame) -> pd.DataFrame:
     # FIX other NaN's by taking average for team in a given season
     # Group by team and season
-    groups = df_raw.groupby(['TEAM_ID', 'SEASON_ID'])
+    groups = df_clean.groupby(['TEAM_ID', 'SEASON_ID'])
     for group_key, group_df in groups:
         # Fill NaN's with mean of numeric columns
         numeric_columns = group_df.select_dtypes(include='number').columns
         group_df[numeric_columns] = group_df[numeric_columns].fillna(group_df[numeric_columns].mean())
-        df_raw.loc[group_df.index] = group_df
+        df_clean.loc[group_df.index] = group_df
     return df_clean
-
-# Scales the data by season
-def scale_by_season(df : pd.DataFrame, cols : list) -> pd.DataFrame:
-    # Make a copy of the df
-    df_scaled = df.copy()
-    
-    # Group by season
-    groups = df.groupby('SEASON_ID')
-    
-    # Scale each season
-    for season, group in groups:
-        for col in cols:
-            season_min = group[col].min()
-            season_max = group[col].max()
-            df_scaled.loc[group.index, col] = (group[col] - season_min) / (season_max - season_min)
-        
-    return df_scaled
 
 
 # MAIN
 
 # Read in data
-read_path = "data/raw/"
 
-df_raw = pd.read_csv(read_path + "raw.csv")
+df_raw = pd.read_csv("raw/raw.csv")
+df_normalized = pd.read_csv("raw/normalized.csv")
+df_standardized = pd.read_csv("raw/standardized.csv")
 
 # add 'IS_HOME' feature (useful for making new index)
 df_raw['IS_HOME'] = df_raw['MATCHUP'].str.contains('vs.').astype(int)
+df_normalized['IS_HOME'] = df_normalized['MATCHUP'].str.contains('vs.').astype(int)
+df_standardized['IS_HOME'] = df_standardized['MATCHUP'].str.contains('vs.').astype(int)
 
 # Make df_clean (df to-be-cleaned below)
 # * Uses 'GAME_ID' and 'IS_HOME' to make new index
 print(" ... Making dataframe to be cleaned ... ")
-df_clean = make_clean_df(df_raw)
+df_clean_unscaled = make_clean_df(df_raw)
+df_clean_normalized = make_clean_df(df_normalized)
+df_clean_standardized = make_clean_df(df_standardized)
 
 # Fix NaN's in PLUS_MINUS by subtracting points scored
 print(" ... Cleaning PLUS_MINUS ... ")
-df_clean = clean_plus_minus(df_clean)
+df_clean_unscaled = clean_plus_minus(df_clean_unscaled)
+df_clean_normalized = clean_plus_minus(df_clean_normalized)
+df_clean_standardized = clean_plus_minus(df_clean_standardized)
 
 # FIX other NaN's by taking average for team in a given season
 print(" ... Cleaning other numeric columns ... ")
-df_clean = clean_other_numeric(df_clean)
+df_clean_unscaled = clean_other_numeric(df_clean_unscaled)
+df_clean_normalized = clean_other_numeric(df_clean_normalized)
+df_clean_standardized = clean_other_numeric(df_clean_standardized)
 
-# Create scaled duplicate
-print(" ... Making scaled duplicate ... ")
+print(" ... Making 'WL' numeric ... ")
+df_clean_unscaled['WL'] = df_clean_unscaled['WL'].map({'W': 1, 'L': 0})
+df_clean_normalized['WL'] = df_clean_normalized['WL'].map({'W': 1, 'L': 0})
+df_clean_standardized['WL'] = df_clean_standardized['WL'].map({'W': 1, 'L': 0})
 
-# Create version with scaled statistical columns
-cols_to_scale = ['MIN', 'PTS', 
-                 'FGM', 'FGA', 'FG_PCT',
-                 'FG3M', 'FG3A', 'FG3_PCT', 
-                 'FTM', 'FTA','FT_PCT', 
-                 'OREB', 'DREB', 'REB', 
-                 'AST', 'STL', 'BLK', 
-                 'TOV', 'PF', 'PLUS_MINUS']
-
-scaled_df_clean = scale_by_season(df_clean, cols_to_scale)
 
 
 # Save unscaled and scaled to csv
 # NOTE: want to keep ID's (useful for later)
-print("... Saving both ... ")
-write_path = "data/processed/"
-df_clean.to_csv(write_path + "unscaled/clean.csv", index=True)
-print("Saved to ", write_path + "unscaled/clean.csv")
+print("... Saving all ... ")
+df_clean_unscaled.to_csv("cleaned/unscaled.csv", index=True)
 
-scaled_df_clean.to_csv(write_path + "scaled/clean.csv", index=True)
-print("Saved to ", write_path + "scaled/clean.csv")
+df_clean_normalized.to_csv("cleaned/normalized.csv", index=True)
+
+df_clean_standardized.to_csv("cleaned/standardized.csv", index=True)
     
     

@@ -15,9 +15,6 @@ def season_to_str(season : int) -> str:
 # WITH RELEVANT DATA
 
 
-
-path = "data/raw/raw.csv"
-
 print("File not found, creating new DataFrame")
 raw_df = pd.DataFrame()
 
@@ -51,6 +48,8 @@ for season in seasons: # to change range
     except Exception as e:
         print("Error: ", e)
         
+        
+path = "raw/raw.csv"
 raw_df.to_csv(path, index=False)
         
     

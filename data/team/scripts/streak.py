@@ -67,17 +67,20 @@ def make_streak_df(mirror_df : pd.DataFrame, ks: list, non_streak_features : lis
 
     # Initializes empty <streak_df>, same index as <mirror_df>
     index = mirror_df.index
-    new_cols = leave_out_cols + cols_to_streak + streak_cols
+    more_cols = ['k_length'] # should be useful
+    #new_cols = leave_out_cols + cols_to_streak + streak_cols + more_cols
+    new_cols = streak_cols + more_cols
+    
+    
     streak_df = pd.DataFrame(index=index, columns=new_cols)
 
         # Adds data to <streak_df> using streaks from the same season
     print("k values: {}".format(ks))
     print("features: {}".format(new_cols))
-    print("(To be done for team A, B)")
     
     
     # Sort <streak_df> by season
-    streak_df = streak_df.sort_values(by='SEASON_ID')
+    #mirror_df = mirror_df.sort_values(by='SEASON_ID')
     seasons = mirror_df['SEASON_ID'].unique()
     
     
@@ -100,8 +103,8 @@ def make_streak_df(mirror_df : pd.DataFrame, ks: list, non_streak_features : lis
             team_df = season_df[season_df['TEAM_ID_for'] == team]
             team_df = team_df.sort_values(by='GAME_DATE')
             
-            for game in team_df.index:
-                game_date = team_df.loc[game, 'GAME_DATE']
+            for id in team_df.index:
+                game_date = team_df.loc[id, 'GAME_DATE']
                 prev_games = team_df[team_df['GAME_DATE'] < game_date]
                 prev_games = prev_games.sort_values(by='GAME_DATE', ascending=False)
                 
@@ -113,14 +116,20 @@ def make_streak_df(mirror_df : pd.DataFrame, ks: list, non_streak_features : lis
                     else:
                         prev_k_games = prev_games.head(k)
                     
+                    k_length = prev_k_games.shape[0]
+                    streak_df.at[id, 'k_length'] = k_length
+                    
                     for col in cols_to_streak:
                         streak_col = make_streak_col(col, k)
-                        streak_df.at[game, streak_col] = prev_k_games[col].mean()
+                        streak_df.at[id, streak_col] = prev_k_games[col].mean()
+
+                    
                 
-                # add leave_out_col data to <streak_df> 
+                
+                """# add leave_out_col data to <streak_df> 
                 # May revisit later to make this more efficient
                 for col in cols_to_streak + leave_out_cols:
-                    streak_df.at[game, col] = team_df.at[game, col]
+                    streak_df.at[id, col] = team_df.at[id, col]"""
 
         season_end_time = time.time()
         print("Season time: ", season_end_time - season_start_time, "seconds")
@@ -128,48 +137,49 @@ def make_streak_df(mirror_df : pd.DataFrame, ks: list, non_streak_features : lis
     return streak_df
 
 
-# Makes <streak_df> of streak data with, same index as <mirror_df>,
-# columns tracking stats over previous 'k' games, leading up to 
-# the corresponding game in <df>
+# FUNCTIONALITY FOR DEALING WITH (ALREADY CREATED) STREAK_DF
+        
+# Features that have nonstreak counterparts
+def get_streak_features(streak_df : pd.DataFrame) -> list:
+    streak_cols = [col for col in streak_df.columns if '_prev_' in col]
+    return streak_cols
 
-start = time.time()
-
-# Read in mirror_df
-mirror_df = pd.read_csv('data/processed/unscaled/mirror.csv', index_col=0)
-mirror_df_scaled = pd.read_csv('data/processed/scaled/mirror.csv', index_col=0)
-
-# Set k-values
-ks = [0]
-
-# Specify which columns NOT to streak
-non_streak_features = ['SEASON_ID', 'GAME_DATE', 
-                    'TEAM_ABBREVIATION_for', 'TEAM_ABBREVIATION_against',
-                    'TEAM_NAME_for', 'TEAM_NAME_against',
-                    'MATCHUP_for', 'MATCHUP_against']
-
-# Make streak_df
-streak_df = make_streak_df(mirror_df, ks, non_streak_features)
-streak_df_scaled = make_streak_df(mirror_df_scaled, ks, non_streak_features)
-
-
-# Make from A and B perspectives
-print("... Making A and B perspectives ...")
-print(" * Unscaled")
-streak_df_AB = make_AB(streak_df)
-print(" * Scaled")
-streak_df_AB_scaled = make_AB(streak_df_scaled)
-
-# dropping non-streak team A, B features
-"""columns_to_drop = []
-for k in ks:
-    columns_to_drop += [col for col in streak_df_AB.columns 
-                       if "_{}".format(k) not in col]
+def get_corresponding_non_streak_features(streak_cols, k=0):
+    if type(streak_cols) != list:
+        streak_cols = [streak_cols]
     
-streak_df_AB.drop(columns=columns_to_drop, inplace=True)"""
+    non_streak_cols = [streak_col.replace('_prev_{}'.format(k), '') for streak_col in streak_cols]
+    return non_streak_cols
 
-streak_df_AB.to_csv('data/processed/unscaled/streak.csv', index=True)
-streak_df_AB_scaled.to_csv('data/processed/scaled/streak.csv', index=True)
 
-end = time.time()
+# Main function 
 
-print(end - start, "seconds total")
+if __name__ == "__main__":
+
+    # Makes <streak_df> of streak data with, same index as <mirror_df>,
+    # columns tracking stats over previous 'k' games, leading up to 
+    # the corresponding game in <df>
+
+    start = time.time()
+
+    # Read in mirror_df
+    mirror_df_standardized = pd.read_csv('mirrored/standardized.csv', index_col=0)
+
+    # Set k-values
+    ks = [0]
+
+    # Specify which columns NOT to streak
+    leave_out_cols = ['SEASON_ID', 'GAME_DATE', 
+            'TEAM_ABBREVIATION_for', 'TEAM_ABBREVIATION_against',
+            'TEAM_NAME_for', 'TEAM_NAME_against',
+            'MATCHUP_for', 'MATCHUP_against']
+
+    # Make streak_df
+    streak_df_standardized = make_streak_df(mirror_df_standardized, ks, leave_out_cols)
+
+    
+    streak_df_standardized.to_csv('streaked/standardized_0.csv', index=True)
+
+    end = time.time()
+
+    print(end - start, "seconds total")

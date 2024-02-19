@@ -60,23 +60,25 @@ def make_mirror_df(clean_df : pd.DataFrame) -> pd.DataFrame:
 
 # MAIN
 
-path = "data/processed/"
+clean_df_unscaled = pd.read_csv("cleaned/unscaled.csv", index_col=0)
+clean_df_normalized = pd.read_csv("cleaned/normalized.csv", index_col=0)
+clean_df_standardized = pd.read_csv("cleaned/standardized.csv", index_col=0)
 
-clean_df = pd.read_csv(path + "unscaled/clean.csv", index_col=0)
-clean_df_scaled = pd.read_csv(path + "scaled/clean.csv", index_col=0)
 
 start = time.time()
 print(" ... Making mirror_df unscaled...")
-mirror_df = make_mirror_df(clean_df)
+mirror_df_unscaled = make_mirror_df(clean_df_unscaled)
 
-print(" ... Making mirror_df scaled ...")
-mirror_df_scaled = make_mirror_df(clean_df_scaled)
+print(" ... Making mirror_df standardized ...")
+mirror_df_standardized = make_mirror_df(clean_df_standardized)
+
+print(" ... Making mirror_df normalized ...")
+mirror_df_normalized = make_mirror_df(clean_df_normalized)
 
 end = time.time()
 print("Time: ", end - start)
 
 # Save files
-mirror_df.to_csv("data/processed/unscaled/mirror.csv", index=True)
-print("Saved to data/processed/unscaled/mirror.csv")
-mirror_df_scaled.to_csv("data/processed/scaled/mirror.csv", index=True)
-print("Saved to data/processed/scaled/mirror.csv")
+mirror_df_unscaled.to_csv("mirrored/unscaled.csv", index=True)
+mirror_df_normalized.to_csv("mirrored/normalized.csv", index=True)
+mirror_df_standardized.to_csv("mirrored/standardized.csv", index=True)
